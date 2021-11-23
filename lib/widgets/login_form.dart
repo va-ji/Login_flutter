@@ -1,7 +1,14 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import '../screens/screens.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key, required this.formKey}) : super(key: key);
+  const LoginPage({
+    Key? key,
+    required this.formKey,
+  }) : super(key: key);
   final GlobalKey<FormState> formKey;
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -10,14 +17,15 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _emailFocusNode = FocusNode();
   final _passwordFocusNode = FocusNode();
+  final auth = FirebaseAuth.instance;
 
-  bool isPasswordText = false;
   bool _isLoading = false;
+  bool isPasswordText = false;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  late String? userEmail;
-  late String? userPassword;
+  String? _userEmail;
+  String? _userPassword;
 
   Widget _textField(
     String title, {
@@ -27,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
     TextInputType? keyBoardType,
     FocusNode? focusNode,
     void Function(String?)? onFieldSubmitted,
-    void Function(String?)? onSaved,
+    void Function(String?)? onChanged,
     TextEditingController? controller,
     String? Function(String?)? validator,
   }) {
@@ -49,13 +57,13 @@ class _LoginPageState extends State<LoginPage> {
             height: 15,
           ),
           TextFormField(
-            onSaved: onSaved,
+            onChanged: onChanged,
             controller: controller,
             focusNode: focusNode,
             keyboardType: keyBoardType,
             onFieldSubmitted: onFieldSubmitted,
             validator: validator,
-            obscureText: !isPasswordText ? true : false,
+            obscureText: isPassWordForm! ? isPasswordText : false,
             textInputAction: textInputAction,
             decoration: InputDecoration(
               hintText: hintText,
@@ -63,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
               border: InputBorder.none,
               fillColor: Colors.white,
               filled: true,
-              suffixIcon: isPassWordForm!
+              suffixIcon: isPassWordForm
                   ? IconButton(
                       icon: Icon(
                         isPasswordText
@@ -97,9 +105,9 @@ class _LoginPageState extends State<LoginPage> {
             FocusScope.of(context).requestFocus(_emailFocusNode);
           },
           textInputAction: TextInputAction.next,
-          keyBoardType: TextInputType.text,
-          onSaved: (value) {
-            userEmail = value;
+          keyBoardType: TextInputType.emailAddress,
+          onChanged: (value) {
+            _userEmail = value;
           },
           isPassWordForm: false,
           validator: (value) {
@@ -116,8 +124,8 @@ class _LoginPageState extends State<LoginPage> {
           focusNode: _passwordFocusNode,
           textInputAction: TextInputAction.done,
           keyBoardType: TextInputType.visiblePassword,
-          onSaved: (value) {
-            userPassword = value;
+          onChanged: (value) {
+            _userPassword = value;
           },
           isPassWordForm: true,
           validator: (value) {
@@ -131,32 +139,41 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _loginButton(void Function()? onPressed) {
+  Widget _loginButton(Function()? navigate) {
     return GestureDetector(
-      onTap: _isLoading ? onPressed : null,
+      onTap: navigate,
       child: Container(
         width: MediaQuery.of(context).size.width,
         padding: const EdgeInsets.symmetric(vertical: 15),
         alignment: Alignment.center,
-        color: Colors.white,
+        color: Colors.green,
         child: _isLoading
             ? const CircularProgressIndicator.adaptive()
             : const Text(
-                'Login',
+                'Sign in',
                 style: TextStyle(color: Colors.black, fontSize: 20),
               ),
       ),
     );
   }
 
-  @override
-  // void dispose() {
-  //   // TODO: implement dispose
-
-  //   _emailController.dispose();
-  //   _passwordController.dispose();
-  //   super.dispose();
-  // }
+  Widget _signUpButton(Function()? signNav) {
+    return GestureDetector(
+      onTap: signNav,
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        padding: const EdgeInsets.symmetric(vertical: 15),
+        alignment: Alignment.center,
+        color: Colors.blue,
+        child: _isLoading
+            ? const CircularProgressIndicator.adaptive()
+            : const Text(
+                'Sign Up',
+                style: TextStyle(color: Colors.black, fontSize: 20),
+              ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -166,6 +183,20 @@ class _LoginPageState extends State<LoginPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _userCredentials(),
+          const Padding(padding: EdgeInsets.all(10)),
+          _loginButton(() {
+            auth.signInWithEmailAndPassword(
+                email: _userEmail!, password: _userPassword!);
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => Welcome()));
+          }),
+          const Padding(padding: EdgeInsets.all(10)),
+          _signUpButton(() {
+            auth.createUserWithEmailAndPassword(
+                email: _userEmail!, password: _userPassword!);
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => Welcome()));
+          })
         ],
       ),
     );
