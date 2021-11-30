@@ -1,13 +1,11 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-
 import '../widgets/widgets.dart';
+import '../screens/screens.dart';
 
-class Login extends StatelessWidget {
-  Login({Key? key}) : super(key: key);
+class SignUp extends StatelessWidget {
+  SignUp({Key? key}) : super(key: key);
 
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _key = GlobalKey<FormState>();
 
   double getFormWidth(context) {
     if (MediaQuery.of(context).size.width > 1200) {
@@ -24,8 +22,18 @@ class Login extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double height = MediaQuery.of(context).size.height;
+    final height = MediaQuery.of(context).size.height;
+
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Login()),
+          ),
+        ),
+      ),
       body: Container(
         height: height,
         width: MediaQuery.of(context).size.width,
@@ -54,20 +62,22 @@ class Login extends StatelessWidget {
               width: getFormWidth(context),
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: SingleChildScrollView(
-                  child: Column(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 150.0, bottom: 40),
-                    child: Text(
-                      'Login Page',
-                      style: TextStyle(fontSize: 60, color: Colors.white),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(top: 60.0, bottom: 40),
+                      child: Text(
+                        'Sign Up ',
+                        style: TextStyle(fontSize: 60, color: Colors.white),
+                      ),
                     ),
-                  ),
-                  LoginPage(
-                    formKey: _formKey,
-                  ),
-                ],
-              )),
+                    SignUpWidget(
+                      formKey: _key,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
