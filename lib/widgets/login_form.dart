@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:login_page/screens/sign_up.dart';
 
 import '../screens/screens.dart';
 
@@ -20,7 +21,7 @@ class _LoginPageState extends State<LoginPage> {
   final auth = FirebaseAuth.instance;
 
   bool _isLoading = false;
-  bool isPasswordText = false;
+  bool isPasswordText = true;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -38,6 +39,7 @@ class _LoginPageState extends State<LoginPage> {
     void Function(String?)? onChanged,
     TextEditingController? controller,
     String? Function(String?)? validator,
+    IconButton? prefixButton,
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10),
@@ -71,6 +73,7 @@ class _LoginPageState extends State<LoginPage> {
               border: InputBorder.none,
               fillColor: Colors.white,
               filled: true,
+              prefixIcon: prefixButton,
               suffixIcon: isPassWordForm
                   ? IconButton(
                       icon: Icon(
@@ -101,6 +104,8 @@ class _LoginPageState extends State<LoginPage> {
           hintText: 'Please enter your email',
           controller: _emailController,
           focusNode: _emailFocusNode,
+          prefixButton: IconButton(
+              onPressed: () {}, icon: const Icon(Icons.email_rounded)),
           onFieldSubmitted: (_) {
             FocusScope.of(context).requestFocus(_emailFocusNode);
           },
@@ -124,6 +129,8 @@ class _LoginPageState extends State<LoginPage> {
           focusNode: _passwordFocusNode,
           textInputAction: TextInputAction.done,
           keyBoardType: TextInputType.visiblePassword,
+          prefixButton: IconButton(
+              onPressed: () {}, icon: const Icon(Icons.vpn_key_rounded)),
           onChanged: (value) {
             _userPassword = value;
           },
@@ -184,18 +191,38 @@ class _LoginPageState extends State<LoginPage> {
         children: [
           _userCredentials(),
           const Padding(padding: EdgeInsets.all(10)),
-          _loginButton(() {
-            auth.signInWithEmailAndPassword(
-                email: _userEmail!, password: _userPassword!);
-            Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => Welcome()));
+          _loginButton(() async {
+            try {
+              User user = (await auth.signInWithEmailAndPassword(
+                      email: _userEmail!, password: _userPassword!))
+                  .user!;
+              if (user != null) {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) => Welcome()));
+              }
+            } on FirebaseAuthException catch (e) {
+              if (e.code == 'user-not-found') {
+                AlertDialog(
+                  title: const Text('No user found for that email.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Back'),
+                    )
+                  ],
+                );
+              }
+            }
+
+            // Navigator.of(context).pushReplacement(
+            //     MaterialPageRoute(builder: (context) => Welcome()));
           }),
           const Padding(padding: EdgeInsets.all(10)),
           _signUpButton(() {
-            auth.createUserWithEmailAndPassword(
-                email: _userEmail!, password: _userPassword!);
             Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => Welcome()));
+                MaterialPageRoute(builder: (context) => SignUp()));
           })
         ],
       ),
