@@ -221,8 +221,8 @@ class _LoginPageState extends State<LoginPage> {
           }),
           const Padding(padding: EdgeInsets.all(10)),
           _signUpButton(() {
-            Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => SignUp()));
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (context) => SignUp()));
           })
         ],
       ),
