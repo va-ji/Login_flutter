@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:login_page/screens/login.dart';
 
 class SignUpWidget extends StatefulWidget {
   const SignUpWidget({Key? key, required this.formKey}) : super(key: key);
@@ -47,6 +48,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
     TextEditingController? textEditingController,
     void Function(String)? onChaged,
     void Function(String)? onFieldSub,
+    void Function()? ontap,
     TextInputType? textInputType,
     TextInputAction? textInputAction,
     bool? passWordForm,
@@ -79,6 +81,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
             keyboardType: textInputType,
             obscureText: passWordForm!,
             onFieldSubmitted: onFieldSub,
+            onTap: ontap,
             validator: validate,
             decoration: InputDecoration(
               hintText: hintText,
@@ -134,7 +137,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
               return 'Email required';
             }
 
-            if (_isEmailValid(email)) {
+            if (!_isEmailValid(email)) {
               return 'Email invalid';
             }
 
@@ -156,6 +159,10 @@ class _SignUpWidgetState extends State<SignUpWidget> {
             },
             onChaged: (value) {
               _userPass = value;
+            },
+            ontap: () {
+              _passWordController.clear();
+              _passWordConfirmCOntroller.clear();
             },
             prefixIcon: Icons.vpn_key_rounded,
             validate: (pass) {
@@ -217,7 +224,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                     duration: Duration(seconds: 5),
                   ),
                 );
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(context);
               } on FirebaseAuthException catch (e) {
                 showDialog(
                   context: context,
